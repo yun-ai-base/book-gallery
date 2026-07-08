@@ -453,7 +453,7 @@ function csGetValue(wrapId){
 
 // Visit counter (hidden, only in stats panel)
 let visitCount = null;
-fetch('https://api.countapi.xyz/hit/yun-ai-base/book-gallery').then(r=>r.json()).then(d=>{visitCount=d.value}).catch(()=>{});
+fetch('http://localhost:3456/hit/book-gallery').then(r=>r.json()).then(d=>{visitCount=d.value}).catch(()=>{});
 
 function toggleReadFilter(){readOn=!readOn;document.getElementById('readFilter').classList.toggle('active');filterBooks()}
 
@@ -673,7 +673,7 @@ function toggleStatsPanel(){
   p.classList.toggle('open');
   document.body.style.overflow=p.classList.contains('open')?'hidden':'';
   if(p.classList.contains('open')&&!statsRendered){renderStatsPanel();statsRendered=true}
-  fetch('https://api.countapi.xyz/get/yun-ai-base/book-gallery').then(r=>r.json()).then(d=>{visitCount=d.value;const el=document.getElementById('visitCount');if(el)el.textContent=d.value+' 次'}).catch(()=>{});
+  fetch('http://localhost:3456/hit/book-gallery').then(r=>r.json()).then(d=>{visitCount=d.value;const el=document.getElementById('visitCount');if(el)el.textContent=d.value+' 次'}).catch(()=>{});
 }
 function renderStatsPanel(){
   const total=books.length, finished=books.filter(b=>getStatus(b)==='finished').length;
