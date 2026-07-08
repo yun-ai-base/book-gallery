@@ -450,6 +450,11 @@ function csGetValue(wrapId){
   return document.querySelector('#'+wrapId+' .cs-option.active')?.dataset?.value || '';
 }
 
+
+// Visit counter (hidden, only in stats panel)
+let visitCount = null;
+fetch('https://api.countapi.xyz/hit/yun-ai-base/book-gallery').then(r=>r.json()).then(d=>{visitCount=d.value}).catch(()=>{});
+
 function toggleReadFilter(){readOn=!readOn;document.getElementById('readFilter').classList.toggle('active');filterBooks()}
 
 function filterBooks(){
@@ -668,6 +673,7 @@ function toggleStatsPanel(){
   p.classList.toggle('open');
   document.body.style.overflow=p.classList.contains('open')?'hidden':'';
   if(p.classList.contains('open')&&!statsRendered){renderStatsPanel();statsRendered=true}
+  fetch('https://api.countapi.xyz/get/yun-ai-base/book-gallery').then(r=>r.json()).then(d=>{visitCount=d.value;const el=document.getElementById('visitCount');if(el)el.textContent=d.value+' 次'}).catch(()=>{});
 }
 function renderStatsPanel(){
   const total=books.length, finished=books.filter(b=>getStatus(b)==='finished').length;
@@ -691,6 +697,7 @@ function renderStatsPanel(){
     '<div class="stat-row"><span class="label">想读</span><span class="value">'+wish+' 本</span></div>'+
     '<div class="stat-row"><span class="label">平均评分</span><span class="value">'+(avgRating?avgRating.toFixed(1):'-')+'</span></div>'+
     (totalPages?'<div class="stat-row"><span class="label">总页数</span><span class="value">'+totalPages.toLocaleString()+' 页</span></div>':'')+
+    '<div class="stat-row"><span class="label">访问次数</span><span class="value" id="visitCount">'+ (visitCount||'?') +' 次</span></div>'+
     '</div>'+
     '<div class="stat-card"><h3>📚 分类分布</h3>'+sortedCats.map(([c,n])=>
       '<div class="stat-bar-wrap"><span style="font-size:0.75rem;color:#555;min-width:4em;text-align:right">'+esc(c)+'</span><div class="stat-bar-bg"><div class="stat-bar-fill" style="width:'+(n/maxCat*100)+'%"></div></div><span class="stat-bar-label">'+n+' 本</span></div>'
