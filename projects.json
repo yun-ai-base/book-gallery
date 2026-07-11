@@ -8,5 +8,5 @@
   { "name": "cosmic-discussion", "desc": "宇宙大爆炸 · AI 终端深度对话", "icon": "🌌", "cat": "ai" },
   { "name": "being-towards-death", "desc": "向死而生 · AI 终端哲学对话", "icon": "🕯️", "cat": "ai" },
   { "name": "cognitive-biases-atlas", "desc": "认知谬误可视化 · 21 种思维偏差", "icon": "🧩", "cat": "tool" },
-  { "name": "poetry-glory-world", "desc": "中国诗词人荣耀世界 · 88位诗词人3D球体交互展示", "icon": "🏯", "cat": "content" }
+  { "name": "chinese-colors", "desc": "中国传统色彩 — 古画着色与纹样鉴赏", "icon": "🎨", "cat": "tool", "url": "https://yun-ai-base.github.io/chinese-colors/" }
 ]
