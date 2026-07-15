@@ -475,7 +475,7 @@ function setBookStatus(b, s){
 }
 
 const cats = new Set();
-const PAGE_SIZE = 60;
+const PAGE_SIZE = 36;
 let loadedCount = PAGE_SIZE;
 let loadMoreObserver = null;
 
@@ -570,7 +570,7 @@ function renderGrid(forceRedraw){
       const b = filtered[i];
       const c=document.createElement('div');c.className='book-card';
       const st=getStatus(b), r=b.rating?Math.round(b.rating/10):0, h=b.cover&&b.cover.startsWith('http');
-      c.innerHTML='<div class="cover-wrap">'+(h?'<img src="'+esc(b.cover)+'" alt="'+esc(b.title)+'">':'<div class="no-cover">'+esc(b.title)+'</div>')+
+      c.innerHTML='<div class="cover-wrap">'+(h?'<img loading="lazy" decoding="async" src="'+esc(b.cover)+'" alt="'+esc(b.title)+'">':'<div class="no-cover">'+esc(b.title)+'</div>')+
         (st==='finished'?'<span class="finished-stamp">已读</span>':(st==='reading'?'<span class="reading-stamp">在读</span>':''))+
         '</div><div class="info"><div class="title">'+esc(b.title)+'</div><div class="author">'+esc(b.author||'')+
         '</div><div class="meta">'+(r>0?'<span class="rating">'+'&#9733;'.repeat(Math.min(r,10))+'</span>'+(r>0?'<b style="margin-left:2px;font-size:0.7rem">'+(b.rating/10).toFixed(1)+'</b>':'')+'':'')+
@@ -586,7 +586,7 @@ function renderGrid(forceRedraw){
       const b = filtered[i];
       const c=document.createElement('div');c.className='book-card';
       const st=getStatus(b), r=b.rating?Math.round(b.rating/10):0, h=b.cover&&b.cover.startsWith('http');
-      c.innerHTML='<div class="cover-wrap">'+(h?'<img src="'+esc(b.cover)+'" alt="'+esc(b.title)+'">':'<div class="no-cover">'+esc(b.title)+'</div>')+
+      c.innerHTML='<div class="cover-wrap">'+(h?'<img loading="lazy" decoding="async" src="'+esc(b.cover)+'" alt="'+esc(b.title)+'">':'<div class="no-cover">'+esc(b.title)+'</div>')+
         (st==='finished'?'<span class="finished-stamp">已读</span>':(st==='reading'?'<span class="reading-stamp">在读</span>':''))+
         '</div><div class="info"><div class="title">'+esc(b.title)+'</div><div class="author">'+esc(b.author||'')+
         '</div><div class="meta">'+(r>0?'<span class="rating">'+'&#9733;'.repeat(Math.min(r,10))+'</span>'+(r>0?'<b style="margin-left:2px;font-size:0.7rem">'+(b.rating/10).toFixed(1)+'</b>':'')+'':'')+
@@ -631,7 +631,26 @@ function openRandomBook(){
   openModal(avail[Math.floor(Math.random()*avail.length)]);
 }
 
+let __detailLoading = null;
+function ensureBooksDetail(){
+  if (window.__booksDetail) return Promise.resolve(window.__booksDetail);
+  if (!__detailLoading){
+    __detailLoading = new Promise((resolve, reject)=>{
+      const s = document.createElement('script');
+      s.src = 'books-detail.js';
+      s.onload = ()=>resolve(window.__booksDetail);
+      s.onerror = ()=>reject(new Error('books-detail.js 加载失败'));
+      document.body.appendChild(s);
+    });
+  }
+  return __detailLoading;
+}
+function getFull(b){ return (window.__booksDetail && window.__booksDetail.get(b.id)) || b; }
 function openModal(b){
+  renderModal(b);                                   // 立即用网格数据渲染（瞬时）
+  ensureBooksDetail().then(()=>{ renderModal(getFull(b)); }).catch(()=>{});  // 详情到达后补全译者/出版社/简介等
+}
+function renderModal(b){
   const r=b.rating?Math.round(b.rating/10):0, score=r>0?(b.rating/10).toFixed(1):'', h=b.cover&&b.cover.startsWith('http');
   const st=getStatus(b);
   let m='';
@@ -711,33 +730,38 @@ function copyTitle(btn,title){
 }
 
 function downloadBooks(){
-  const list = readOn ? filtered : books;
-  let md = '# 我的书房 - 书籍清单\n\n';
-  md += `导出时间：${new Date().toLocaleDateString('zh-CN')}\n`;
-  md += `共 ${list.length} 本书\n\n---\n\n`;
-  list.forEach((b,i)=>{
-    const st = getStatus(b);
-    const rating = b.rating ? (b.rating/10).toFixed(1) : '-';
-    md += `## ${i+1}. ${b.title}\n\n`;
-    md += `- **作者**：${b.author || '-'}\n`;
-    if (b.translator) md += `- **译者**：${b.translator}\n`;
-    if (b.publisher) md += `- **出版社**：${b.publisher}\n`;
-    if (b.publishTime) md += `- **出版时间**：${b.publishTime.split(' ')[0]}\n`;
-    if (b.pages) md += `- **页数**：${b.pages}\n`;
-    if (b.wordCount) md += `- **字数**：${(b.wordCount/10000).toFixed(0)}万\n`;
-    md += `- **分类**：${b.category || '-'}\n`;
-    md += `- **评分**：${rating}`;
-    if (b.ratingCount) md += `（${b.ratingCount} 人评分）`;
-    md += '\n';
-    if (b.isbn) md += `- **ISBN**：${b.isbn}\n`;
-    md += `- **状态**：${statusLabel(st)}\n`;
-    if (b.intro) md += `\n  > ${b.intro.replace(/\n/g, '\n  > ')}\n`;
-    md += '\n---\n';
-  });
-  const blob = new Blob([md], {type:'text/markdown;charset=utf-8'});
-  const a = document.createElement('a');a.href=URL.createObjectURL(blob);
-  a.download = `我的书房_${new Date().toISOString().slice(0,10)}.md`;a.click();
-  URL.revokeObjectURL(a.href);
+  const build = ()=>{
+    const list = readOn ? filtered : books;
+    let md = '# 我的书房 - 书籍清单\n\n';
+    md += `导出时间：${new Date().toLocaleDateString('zh-CN')}\n`;
+    md += `共 ${list.length} 本书\n\n---\n\n`;
+    list.forEach((b,i)=>{
+      const fb = getFull(b);
+      const st = getStatus(fb);
+      const rating = fb.rating ? (fb.rating/10).toFixed(1) : '-';
+      md += `## ${i+1}. ${fb.title}\n\n`;
+      md += `- **作者**：${fb.author || '-'}\n`;
+      if (fb.translator) md += `- **译者**：${fb.translator}\n`;
+      if (fb.publisher) md += `- **出版社**：${fb.publisher}\n`;
+      if (fb.publishTime) md += `- **出版时间**：${fb.publishTime.split(' ')[0]}\n`;
+      if (fb.pages) md += `- **页数**：${fb.pages}\n`;
+      if (fb.wordCount) md += `- **字数**：${(fb.wordCount/10000).toFixed(0)}万\n`;
+      md += `- **分类**：${fb.category || '-'}\n`;
+      md += `- **评分**：${rating}`;
+      if (fb.ratingCount) md += `（${fb.ratingCount} 人评分）`;
+      md += '\n';
+      if (fb.isbn) md += `- **ISBN**：${fb.isbn}\n`;
+      md += `- **状态**：${statusLabel(st)}\n`;
+      if (fb.intro) md += `\n  > ${fb.intro.replace(/\n/g, '\n  > ')}\n`;
+      md += '\n---\n';
+    });
+    const blob = new Blob([md], {type:'text/markdown;charset=utf-8'});
+    const a = document.createElement('a');a.href=URL.createObjectURL(blob);
+    a.download = `我的书房_${new Date().toISOString().slice(0,10)}.md`;a.click();
+    URL.revokeObjectURL(a.href);
+  };
+  if (window.__booksDetail) build();
+  else ensureBooksDetail().then(build).catch(build);
 }
 
 // Stats panel
@@ -758,9 +782,9 @@ function renderStatsPanel(){
   const maxCat=Math.max(...sortedCats.map(c=>c[1]),1);
   const rated=books.filter(b=>b.rating&&b.rating>0);
   const avgRating=rated.length?rated.reduce((s,b)=>s+b.rating,0)/rated.length/10:0;
-  const pagesBooks=books.filter(b=>b.pages);
+  const srcPages = window.__booksDetail ? [...window.__booksDetail.values()] : books;
+  const pagesBooks=srcPages.filter(b=>b.pages);
   const totalPages=pagesBooks.reduce((s,b)=>s+b.pages,0);
-  const withIntro=books.filter(b=>b.intro).length;
   const topRated=[...books].sort((a,b)=>(b.rating||0)-(a.rating||0)).slice(0,5);
 
   document.getElementById('statsContent').innerHTML=
@@ -779,6 +803,8 @@ function renderStatsPanel(){
     '<div class="stat-card"><h3>🏆 评分最高</h3>'+topRated.map(b=>
       '<div class="stat-row"><span class="label">'+esc(b.title.slice(0,20))+'</span><span class="value">'+(b.rating?(b.rating/10).toFixed(1):'-')+'</span></div>'
     ).join('')+'</div>';
+  // 首屏没有完整数据（pages 在详情文件里）；详情到达后重算总页数
+  if (!window.__booksDetail) ensureBooksDetail().then(()=>{ if (document.getElementById('statsPanel').classList.contains('open')) renderStatsPanel(); }).catch(()=>{});
 }
 
 // ═══ 本书思维脑图（按需加载 · lazy） ═══
