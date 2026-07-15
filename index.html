@@ -3,6 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- ★ anti-cache：确保浏览器始终加载最新版本（脑图功能频繁更新中） -->
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>我的书房</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='8' y='12' width='48' height='42' rx='4' fill='%23f5f1eb' stroke='%232c2416' stroke-width='2'/%3E%3Crect x='12' y='16' width='18' height='22' rx='2' fill='%23c8a95a'/%3E%3Crect x='34' y='16' width='18' height='28' rx='2' fill='%23e8dcc8'/%3E%3Cline x1='12' y1='42' x2='52' y2='42' stroke='%23d4c8b0' stroke-width='1.5'/%3E%3Cline x1='30' y1='16' x2='30' y2='42' stroke='%23d4c8b0' stroke-width='1.5'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -301,6 +305,49 @@ body{
 }
 
 @media(min-width:1600px){.grid{grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:28px}}
+
+/* ═══ 思维脑图 ═══ */
+.mindmap-overlay{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.55);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:24px}
+.mindmap-overlay.open{display:flex}
+.mindmap-panel{background:#fff;border-radius:20px;max-width:1200px;width:100%;height:96vh;max-height:96vh;display:flex;flex-direction:column;box-shadow:0 24px 80px rgba(0,0,0,0.25);animation:modalIn 0.3s ease;position:relative;overflow:hidden}
+.mindmap-header{display:flex;align-items:center;justify-content:space-between;padding:18px 28px;border-bottom:1px solid #eee;flex-shrink:0}
+.mindmap-header h2{font-family:'Noto Serif SC',serif;font-size:1rem;font-weight:700;color:#2c2416;max-width:60%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mindmap-header-actions{display:flex;gap:8px}
+.mindmap-btn{height:34px;padding:0 14px;border-radius:8px;border:1px solid #e0d6c8;background:#f8f6f2;color:#555;font-size:0.78rem;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.mindmap-btn:hover{background:#ede5db;color:#2c2416;border-color:#c8a95a}
+.mindmap-btn.primary{background:#2c2416;color:#e8dcc8;border-color:#2c2416}
+.mindmap-btn.primary:hover{background:#423828}
+.mindmap-close{width:32px;height:32px;border-radius:50%;border:none;background:rgba(0,0,0,0.06);color:#666;font-size:1.1rem;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.mindmap-close:hover{background:rgba(0,0,0,0.12);color:#333}
+.mindmap-body{flex:1;min-height:0;position:relative;background:#fafaf8}
+.mindmap-body svg{width:100%;height:100%;touch-action:none}
+.mindmap-loading{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#8a7e6a;font-size:0.85rem;gap:12px}
+.mindmap-loading .spinner{width:28px;height:28px;border:3px solid #e0d6c8;border-top-color:#8a7e6a;border-radius:50%;animation:spin 0.8s linear infinite}
+.mindmap-footer{padding:10px 28px;border-top:1px solid #eee;font-size:0.72rem;color:#aaa;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.mindmap-footer span{cursor:default}
+.btn-mindmap-card{
+  display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:4px;
+  border:1px solid #e0d6c8;background:#f8f6f2;color:#8a7e6a;font-size:0.6rem;
+  cursor:pointer;transition:all 0.2s;margin-left:auto;line-height:1.4
+}
+.btn-mindmap-card:hover{background:#ede5db;color:#2c2416;border-color:#c8a95a}
+.btn-mindmap-modal{
+  flex:1;display:flex;align-items:center;justify-content:center;gap:6px;height:42px;
+  border-radius:10px;font-size:0.85rem;font-weight:500;text-decoration:none;
+  transition:all 0.2s;cursor:pointer;border:1px solid #e0d6c8;
+  background:#f8f6f2;color:#2c2416
+}
+.btn-mindmap-modal:hover{background:#ede5db;border-color:#c8a95a}
+@media(max-width:768px){
+  .mindmap-overlay{padding:8px}
+  .mindmap-panel{border-radius:12px;height:96vh;max-height:96vh}
+  .mindmap-header{position:relative;padding:14px 16px;flex-wrap:wrap;gap:8px}
+  .mindmap-header h2{font-size:0.85rem;max-width:100%;padding-right:36px}
+  .mindmap-close{position:absolute;top:10px;right:10px}
+  .mindmap-header-actions{width:100%;justify-content:flex-end;flex-wrap:wrap}
+  .mindmap-body{min-height:72vh}
+  .mindmap-footer{padding:8px 16px;font-size:0.62rem}
+}
 </style>
 </head>
 <body>
@@ -370,6 +417,32 @@ body{
       <p>我的其他项目 · 点击跳转</p>
     </div>
     <div id="twinContainer"></div>
+  </div>
+</div>
+
+<div class="mindmap-overlay" id="mindmapView" onclick="if(event.target===this)closeMindmap()">
+  <div class="mindmap-panel">
+    <div class="mindmap-header">
+      <h2 id="mmTitle">思维脑图</h2>
+      <div class="mindmap-header-actions">
+        <button class="mindmap-btn" onclick="event.stopPropagation();mmFit()">适配</button>
+        <button class="mindmap-btn" onclick="event.stopPropagation();mmZoom(1.2)">放大</button>
+        <button class="mindmap-btn" onclick="event.stopPropagation();mmZoom(0.8)">缩小</button>
+        <button class="mindmap-btn" id="mmRawBtn" onclick="event.stopPropagation();mmToggleRaw()">原文/脑图</button>
+        <button class="mindmap-btn primary" onclick="event.stopPropagation();mmExport()">导出 .md</button>
+        <button class="mindmap-btn primary" onclick="event.stopPropagation();mmExportPng()" id="mmPngBtn">📷 导出图片</button>
+      </div>
+      <button class="mindmap-close" onclick="event.stopPropagation();closeMindmap()">✕</button>
+    </div>
+    <div class="mindmap-body" id="mmBody">
+      <svg id="mmSvg"></svg>
+      <pre id="mmRaw"></pre>
+      <div class="mindmap-loading" id="mmLoading" style="display:flex"><div class="spinner"></div><span>正在加载思维脑图…</span></div>
+    </div>
+    <div class="mindmap-footer">
+      <span>深度阅读工程流 Rev3.0 · 打开为总览（滚轮缩放/拖动查看）；高清整图点 📷 导出图片</span>
+      <span id="mmErr" style="display:none"></span>
+    </div>
   </div>
 </div>
 
@@ -570,7 +643,8 @@ function openModal(b){
     '</div><div class="modal-info"><div class="title-row"><h2>'+esc(b.title)+'</h2><button class="btn-copy-title" onclick="event.stopPropagation();copyTitle(this,\''+jsEsc(b.title)+'\')">📋 复制书名</button></div>'+(b.author?'<div class="sub">'+esc(b.author)+'</div>':'')+
     (r>0?'<div class="rating-row"><span class="stars">'+'&#9733;'.repeat(Math.min(r,10))+'</span><span class="score">'+score+'</span><span class="count">'+(b.ratingCount?b.ratingCount+'人评分':'')+'</span></div>':'')+
     '<div class="meta-grid">'+m+'</div><div class="btn-group" style="margin-top:14px"><div class="status-toggle">'+sb+'</div></div>'+
-    '<div class="btn-group"><a class="btn-douban" href="'+esc(b.doubanUrl||'#')+'" target="_blank" rel="noopener">&#8599; 豆瓣页面</a><a class="btn-weread" href="'+wereadWebUrl(b)+'" target="_blank" rel="noopener">&#8599; 微信读书</a></div></div></div>'+
+    '<div class="btn-group"><a class="btn-douban" href="'+esc(b.doubanUrl||'#')+'" target="_blank" rel="noopener">&#8599; 豆瓣页面</a><a class="btn-weread" href="'+wereadWebUrl(b)+'" target="_blank" rel="noopener">&#8599; 微信读书</a></div>'+
+    '<div class="btn-group"><button class="btn-mindmap-modal" onclick="event.stopPropagation();openMindmap(\''+b.id+'\')">🧠 本书思维导图</button></div></div></div>'+
     (b.intro||b.authorIntro?'<div class="modal-divider"></div><div class="modal-body">':'')+
     (b.intro?'<section><h3>内容简介</h3><p>'+esc(b.intro)+'</p></section>':'')+
     (b.authorIntro?'<section><h3>作者简介</h3><p>'+esc(b.authorIntro)+'</p></section>':'')+
@@ -580,7 +654,7 @@ function openModal(b){
 }
 
 function closeModal(e){if(e&&e.target!==e.currentTarget)return;document.getElementById('modal').classList.remove('open');document.body.style.overflow=''}
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();if(document.getElementById('statsPanel').classList.contains('open'))toggleStatsPanel();if(document.getElementById('twinView').classList.contains('open'))toggleTwin()}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();if(document.getElementById('statsPanel').classList.contains('open'))toggleStatsPanel();if(document.getElementById('twinView').classList.contains('open'))toggleTwin();if(document.getElementById('mindmapView').classList.contains('open'))closeMindmap()}});
 
 // ═══ 孪生宇宙 ═══
 var SELF_PROJECT = 'book-gallery';
@@ -706,6 +780,301 @@ function renderStatsPanel(){
       '<div class="stat-row"><span class="label">'+esc(b.title.slice(0,20))+'</span><span class="value">'+(b.rating?(b.rating/10).toFixed(1):'-')+'</span></div>'
     ).join('')+'</div>';
 }
+
+// ═══ 本书思维脑图（按需加载 · lazy） ═══
+const NO_MINDMAP = new Set(['3300024284','41176024','838899','855765']);
+let mmLibsReady = false, mmLibsLoading = false, mmLibCallbacks = [];
+let mm = null, mmCurrent = null, mmRawMode = false, mmCache = {}, mmRootData = null;
+
+function ensureMindmapLibs(cb){
+  if (mmLibsReady) { cb && cb(null); return; }
+  if (mmLibsLoading) { mmLibCallbacks.push(cb); return; }
+  mmLibsLoading = true;
+  const files = ['d3.min.js','markmap-lib.js','markmap-view.js'];
+  const base = './mindmaps/assets/';
+  let i = 0;
+  (function loadNext(){
+    if (i >= files.length){
+      mmLibsReady = true; mmLibsLoading = false;
+      mmLibCallbacks.splice(0).forEach(f=>f && f(null));
+      cb && cb(null); return;
+    }
+    const s = document.createElement('script');
+    s.src = base + files[i++];
+    s.onload = loadNext;
+    s.onerror = ()=>{ mmLibsLoading = false; mmLibCallbacks.splice(0).forEach(f=>f && f(new Error('lib'))); cb && cb(new Error('lib')); };
+    document.head.appendChild(s);
+  })();
+}
+
+function openMindmap(id){
+  mmCurrent = id;
+  const ov = document.getElementById('mindmapView');
+  const loading = document.getElementById('mmLoading');
+  const svg = document.getElementById('mmSvg');
+  const raw = document.getElementById('mmRaw');
+  loading.style.display = 'flex'; svg.style.display = 'none'; raw.style.display = 'none'; raw.textContent = '';
+  hideMindmapErr();
+  ov.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  const b = books.find(x=>String(x.id)===String(id));
+  document.getElementById('mmTitle').textContent = '🧠 ' + (b ? b.title : id);
+  document.getElementById('mmRawBtn').textContent = '原文/脑图';
+  if (NO_MINDMAP.has(String(id))) {
+    loading.style.display = 'none';
+    showMindmapErr('本书暂无思维导图（敏感内容已跳过）');
+    return;
+  }
+  ensureMindmapLibs(err=>{
+    if (err || !window.markmap || !window.markmap.Transformer || !window.markmap.Markmap){
+      showMindmapErr('可视化库加载失败，请确认 mindmaps/assets 目录完整');
+      loading.style.display = 'none'; return;
+    }
+    fetchMindmap(id);
+  });
+}
+
+function fetchMindmap(id){
+  if (mmCache[id] != null){ drawMindmap(mmCache[id]); return; }
+  const loading = document.getElementById('mmLoading');
+  loading.style.display = 'flex';
+  fetch('./mindmaps/md/' + id + '.md')
+    .then(r=>{ if(!r.ok) throw new Error('missing'); return r.text(); })
+    .then(txt=>{ mmCache[id] = txt; drawMindmap(txt); })
+    .catch(()=>{
+      loading.style.display = 'none';
+      showMindmapErr('本书暂无思维导图（可能尚未生成或已跳过）');
+    });
+}
+
+function drawMindmap(md){
+  const svg = document.getElementById('mmSvg');
+  const raw = document.getElementById('mmRaw');
+  const body = document.getElementById('mmBody');
+  const loading = document.getElementById('mmLoading');
+  if (mm && mm.destroy){ try{ mm.destroy(); }catch(e){} mm = null; }
+  loading.style.display = 'none';
+  raw.style.display = 'none';
+  svg.style.display = 'block';
+  svg.innerHTML = '';
+  // ★ 关键修复①：给 SVG 设明确的像素尺寸（不用 CSS %）。
+  //   flex 子元素的 % 尺寸在 Markmap.create 时可能为 0 → 渲染空 SVG（0 个子节点）。
+  const w = body ? body.clientWidth || 1000 : 1000;
+  const h = body ? body.clientHeight || 700 : 700;
+  svg.style.width = w + 'px';
+  svg.style.height = h + 'px';
+  svg.setAttribute('width', String(w));
+  svg.setAttribute('height', String(h));
+  try{
+    const transformer = new window.markmap.Transformer();
+    const { root } = transformer.transform(md);
+    mmRootData = root;
+    mm = window.markmap.Markmap.create(svg, {
+      duration:300, maxWidth:500, paddingX:16, paddingY:14,
+      lineWidth:2.5, pan:true, zoom:true,
+      color:(d)=>{
+        const pal = ['#2b6cb0','#2c7a7b','#c05621','#6b46c1','#b7791f','#2f855a','#3182ce','#dd6b20'];
+        const seg = (d.state && d.state.path || '1').split('.');
+        const idx = seg.length > 1 ? parseInt(seg[1], 10) : 0;
+        return pal[(idx - 1) % pal.length] || '#2b6cb0';
+      }
+    }, root);
+    mmRawMode = false; document.getElementById('mmRawBtn').textContent = '原文/脑图';
+    // ★ 打开后设定「可读的初始视图」（替代旧的 rescale(2.6) —— 那是以视口中心放大，
+    //   会把大树的 root 和大部分节点推到视口外，屏幕上一片空白）。
+    //   markmap 渲染需要一帧完成布局，故延后到下一帧再定位视图。
+    try { setTimeout(function(){ mmInitView(); }, 80); } catch(e){}
+  }catch(e){
+    console.error('[mindmap] render error:', e);
+    raw.textContent = md; raw.style.display = 'block'; svg.style.display = 'none'; loading.style.display = 'none';
+  }
+}
+
+// ★ 自适应初始视图：小树整树 fit（全可见且可读）；大树把 root 锚定到左侧、
+//   用可读比例（字≈11px）显示，用户可平移/缩放探索。避免"整树 fit 成 3px 蚂蚁字"
+//   或"中心放大把内容推出视口"这两种都会让人误以为"内容没显示"的情况。
+function mmInitView(){
+  try{
+    if (!mm || !mm.state || !mm.svg || !window.d3) { if (mm && mm.fit) mm.fit(); return; }
+    var node = mm.svg.node();
+    var rect = node.getBoundingClientRect();
+    var W = rect.width || 1000, H = rect.height || 700;
+    var st = mm.state;
+    var natW = st.maxY - st.minY, natH = st.maxX - st.minX;
+    if (!(natW > 0) || !(natH > 0) || [st.minX,st.minY,st.maxX,st.maxY].some(function(v){ return typeof v!=='number' || isNaN(v); })) {
+      if (mm.fit) mm.fit(); return;
+    }
+    var fitRatio = 0.95;
+    var fitScale = Math.min(W / natW * fitRatio, H / natH * fitRatio);
+    var READ = 0.72;   // 16px 自然字 × 0.72 ≈ 11.5px，屏幕上清晰可读
+    if (fitScale >= READ){
+      // 小树：整棵树在可读比例下就能全部装进面板 → 直接 fit，全貌可见
+      if (mm.fit) mm.fit();
+      return;
+    }
+    // 大树：锚定 root 到左侧、垂直居中，用可读比例
+    var k = READ, pad = 36;
+    var tx = pad - st.minY * k;
+    var ty = H / 2 - ((st.minX + st.maxX) / 2) * k;
+    var t = window.d3.zoomIdentity.translate(tx, ty).scale(k);
+    mm.svg.call(mm.zoom.transform, t);
+    // 保险：确保 root 节点真的落在视口内（不平移则视图已 OK）
+    try { if (mm.ensureView && mmRootData) mm.ensureView(mmRootData, { left: pad, top: 24, bottom: 24 }); } catch(e){}
+  }catch(e){
+    try { if (mm && mm.fit) mm.fit(); }catch(_){}
+  }
+}
+function mmFit(){ try{ mm && mm.fit && mm.fit(); }catch(e){} }
+function mmZoom(f){ try{ mm && mm.rescale && mm.rescale(f); }catch(e){} }
+function mmToggleRaw(){
+  if (!mmCurrent) return;
+  mmRawMode = !mmRawMode;
+  const svg = document.getElementById('mmSvg'), raw = document.getElementById('mmRaw');
+  if (mmRawMode){ raw.textContent = mmCache[mmCurrent] || ''; raw.style.display = 'block'; svg.style.display = 'none'; document.getElementById('mmRawBtn').textContent = '回到脑图'; }
+  else { raw.style.display = 'none'; svg.style.display = 'block'; document.getElementById('mmRawBtn').textContent = '原文/脑图'; mmFit(); }
+}
+function mmExport(){
+  if (!mmCurrent) return;
+  const b = books.find(x=>String(x.id)===String(mmCurrent));
+  const name = (b ? b.title : mmCurrent).toString().replace(/[\\/:*?"<>|]/g,'_');
+  const blob = new Blob([mmCache[mmCurrent] || ''], {type:'text/markdown;charset=utf-8'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = name + '_思维导图.md'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+}
+
+/* ── PNG 图片导出（基于 html-to-image，懒加载）── */
+var _h2iReady = false, _h2iLoading = false;
+async function mmExportPng(){
+  if (!mmCurrent) return;
+  var btn = document.getElementById('mmPngBtn');
+  var prev = btn.textContent; btn.textContent = '⏳ 导出中…'; btn.disabled = true;
+
+  // ★ Q1：在用户点击手势内先弹出系统"另存为"对话框（Chrome/Edge 支持；localhost 视为安全上下文）。
+  //   用户取消则直接中止；Firefox/Safari 不支持则退回静默下载到默认文件夹。
+  var _handle = null;
+  if (window.showSaveFilePicker) {
+    try {
+      var _b0 = books.find(x=>String(x.id)===String(mmCurrent));
+      var _sug = ((_b0 ? _b0.title : mmCurrent).toString().replace(/[\\/:*?"<>|]/g,'_')) + '_思维导图.png';
+      _handle = await window.showSaveFilePicker({
+        suggestedName: _sug,
+        types: [{ description: 'PNG 图片', accept: { 'image/png': ['.png'] } }]
+      });
+    } catch (e) {
+      if (e && e.name === 'AbortError') { btn.textContent = prev; btn.disabled = false; return; }
+      _handle = null;
+    }
+  }
+
+  function doExport(){
+    var svg = document.getElementById('mmSvg');
+    var b = books.find(x=>String(x.id)===String(mmCurrent));
+    var name = (b ? b.title : mmCurrent).toString().replace(/[\\/:*?"<>|]/g,'_');
+    var done = false;
+
+    function reset(){ if(done) return; done = true; btn.textContent = prev; btn.disabled = false; clearTimeout(timer); }
+    // ★ 保险：任何意外卡死（如字体内联）最多等 15s 自动复位并提示
+    var timer = setTimeout(function(){
+      if(done) return;
+      done = true; btn.textContent = prev; btn.disabled = false;
+      alert('图片导出超时（可能是字体资源加载过慢），已取消。\n脑图文字使用系统默认字体，不影响效果；如仍失败可改用「导出 .md」。');
+    }, 15000);
+
+    async function run(){
+      try{
+        var st = (mm && mm.state) ? mm.state : null;
+        var _bounds = st ? [st.minX, st.minY, st.maxX, st.maxY] : [];
+        // ★ NaN 防护：typeof NaN === 'number'，旧判断拦不住，必须显式 isNaN
+        if (!st || _bounds.some(function(v){ return typeof v !== 'number' || isNaN(v); })) {
+          throw new Error('脑图尚未渲染完成或尺寸异常（含 NaN），请关闭后重新打开本书再试');
+        }
+        // 注意坐标约定：markmap 中 x 为纵向、y 为横向（节点 transform 为 translate(d.y, d.x-…)）
+        var natW = (st.maxY - st.minY), natH = (st.maxX - st.minX);
+
+        var pad = 28;
+        // 清晰度策略：以「自然比例」为底线（整树仍可见，但文字已是屏幕 fitted 版的若干倍大），
+        // 再额外放大 TARGET 倍，确保任何书都清晰可读；超大图则按上限收敛、文字仍尽量大。
+        var TARGET = 2;
+        var CAP_W = 6000, CAP_H = 7500; // 渲染尺寸上限（最终再 ×pixelRatio），防极端超大图
+        var kw = CAP_W / (natW * TARGET + pad * 2);
+        var kh = CAP_H / (natH * TARGET + pad * 2);
+        var k = Math.min(TARGET, kw, kh);
+        // 画布 = 自然包围盒 × k（以自然为基准，文字才会真正变大）
+        var W = Math.max(600, Math.round(natW * k + pad * 2));
+        var H = Math.max(600, Math.round(natH * k + pad * 2));
+
+        // 保存并临时把 live svg 设为「自然 ×k」尺寸，再交回 markmap 自己 fit
+        var ow = svg.style.width, oh = svg.style.height;
+        var oaw = svg.getAttribute('width'), oah = svg.getAttribute('height');
+        function restore(){
+          svg.style.width = ow; svg.style.height = oh;
+          if (oaw) svg.setAttribute('width', oaw); else svg.removeAttribute('width');
+          if (oah) svg.setAttribute('height', oah); else svg.removeAttribute('height');
+          try{ if (mm && mm.fit) mm.fit(); }catch(e){}
+        }
+        svg.style.width = W + 'px'; svg.style.height = H + 'px';
+        svg.setAttribute('width', W); svg.setAttribute('height', H);
+        // ★ 关键修复①：mm.fit() 是异步函数（内部 d3 transition，返回 Promise），必须 await，
+        //   否则 toBlob 会抢在缩放生效前截图 → 抓到旧的 0.2x 小字布局（大片空白 / "打不开"）。
+        // ★ 关键修复②：fit 的参数是「最大缩放倍数」(数字)，之前误传 {duration:0}(对象)
+        //   → Math.min 拿到对象 → scale=NaN → transform 变 translate(NaN,NaN)（那 39 个报错的根源）。
+        if (mm && mm.fit) { try { await mm.fit(); } catch(e){} }
+        // 双重保险：确认缩放组 transform 已生效且不含 NaN
+        (function(){
+          var _zg = svg.querySelector('g[transform]') || svg.querySelector('g');
+          var _zt = _zg ? _zg.getAttribute('transform') : '';
+          if (/NaN/.test(_zt)) throw new Error('脑图缩放计算出 NaN，请关闭后重新打开本书再试');
+        })();
+
+        var blob = await htmlToImage.toBlob(svg, {
+          backgroundColor: '#fafaf8',
+          width: W, height: H,
+          pixelRatio: 2,
+          skipFonts: true
+        });
+        // ★ Q1：已拿到系统"另存为"句柄则直接写入；否则退回静默下载到默认文件夹
+        if (_handle) {
+          try {
+            var _w = await _handle.createWritable();
+            await _w.write(blob); await _w.close();
+          } catch (e) {
+            restore();
+            alert('保存文件失败：' + (e && e.message ? e.message : String(e)));
+            reset(); return;
+          }
+        } else {
+          var url = URL.createObjectURL(blob);
+          var a = document.createElement('a'); a.href = url;
+          a.download = name + '_思维导图.png'; a.click();
+          setTimeout(function(){ URL.revokeObjectURL(url); }, 2000);
+        }
+        restore();
+        reset();
+      }catch(e){
+        try{ if (typeof restore === 'function') restore(); }catch(_){}
+        console.error('[mindmap] export error:', e);
+        alert('图片导出失败：' + (e && e.message ? e.message : String(e)));
+        reset();
+      }
+    }
+    // 等两帧让量取/布局稳定后再抓图
+    requestAnimationFrame(function(){ requestAnimationFrame(run); });
+  }
+
+  if (_h2iReady) { doExport(); return; }
+  if (_h2iLoading) return; // 防重复
+  _h2iLoading = true;
+  var s = document.createElement('script'); s.src = './mindmaps/assets/html-to-image.js';
+  s.onload = function(){ _h2iReady = true; _h2iLoading = false; doExport(); };
+  s.onerror = function(){ _h2iLoading = false; btn.textContent = prev; btn.disabled = false; alert('图片导出库加载失败，请检查网络后重试。'); };
+  document.head.appendChild(s);
+}
+function closeMindmap(){
+  document.getElementById('mindmapView').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function showMindmapErr(m){ const e = document.getElementById('mmErr'); e.textContent = m; e.style.display = 'inline'; }
+function hideMindmapErr(){ const e = document.getElementById('mmErr'); e.style.display = 'none'; }
 </script>
 </body>
 </html>
