@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-cN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>书库思维脑图 · 深度阅读工程流 Rev3.0</title>
+<style>
+  :root{
+    --bg:#f7f8fa; --panel:#ffffff; --line:#e6e8ec; --ink:#1f2329; --sub:#6b7280;
+    --accent:#2b6cb0; --accent2:#2c7a7b; --warn:#c05621; --chip:#eef2f7;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink)}
+  header{display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid var(--line);background:var(--panel)}
+  header h1{font-size:16px;margin:0;font-weight:700}
+  header .badge{font-size:12px;color:var(--sub);border:1px solid var(--line);border-radius:999px;padding:2px 10px;background:var(--chip)}
+  .wrap{display:flex;height:calc(100% - 53px)}
+  aside{width:340px;min-width:300px;border-right:1px solid var(--line);display:flex;flex-direction:column;background:var(--panel)}
+  .controls{padding:12px;border-bottom:1px solid var(--line)}
+  .controls input,.controls select{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;background:#fff;color:var(--ink)}
+  .controls input{margin-bottom:8px}
+  .count{font-size:12px;color:var(--sub);margin-top:6px}
+  .list{overflow:auto;flex:1;padding:6px}
+  .item{display:flex;gap:10px;align-items:center;padding:8px;border-radius:10px;cursor:pointer;border:1px solid transparent}
+  .item:hover{background:var(--chip)}
+  .item.active{background:#e7f0fb;border-color:#bcd6f2}
+  .item img{width:34px;height:48px;object-fit:cover;border-radius:4px;background:#dfe3e8;flex:none}
+  .item .meta{min-width:0}
+  .item .tt{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .item .au{font-size:11px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  main{flex:1;display:flex;flex-direction:column;min-width:0}
+  .bar{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--line);background:var(--panel);flex-wrap:wrap}
+  .bar .name{font-weight:700;font-size:14px;margin-right:auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:50%}
+  .bar button{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:8px;padding:6px 12px;cursor:pointer;font-size:13px}
+  .bar button:hover{border-color:var(--accent);color:var(--accent)}
+  .stage{flex:1;position:relative;overflow:hidden;background:
+     radial-gradient(circle at 1px 1px,#e9edf2 1px,transparent 0) 0 0/22px 22px,var(--bg)}
+  svg#map{width:100%;height:100%;display:block}
+  pre#raw{display:none;margin:0;padding:18px;height:100%;overflow:auto;white-space:pre-wrap;font-size:13px;line-height:1.7;font-family:"SFMono-Regular",Consolas,"PingFang SC",monospace}
+  .empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--sub);font-size:14px;text-align:center;padding:24px}
+  .legend{position:absolute;left:12px;bottom:12px;font-size:11px;color:var(--sub);background:rgba(255,255,255,.85);border:1px solid var(--line);border-radius:8px;padding:6px 10px;line-height:1.6}
+  .legend b{color:var(--ink)}
+  .tag-o{color:var(--accent)} .tag-t{color:var(--accent2)} .tag-w{color:var(--warn)}
+  .note{font-size:11px;color:var(--sub);padding:8px 18px;border-top:1px solid var(--line);background:var(--panel)}
+</style>
+</head>
+<body>
+<header>
+  <h1>🧠 书库思维脑图</h1>
+  <span class="badge">深度阅读工程流 Rev3.0</span>
+  <span class="badge" id="total">—</span>
+</header>
+<div class="wrap">
+  <aside>
+    <div class="controls">
+      <input id="q" type="search" placeholder="搜索书名 / 作者…" />
+      <select id="cat"><option value="">全部分类</option></select>
+      <div class="count" id="cnt"></div>
+    </div>
+    <div class="list" id="list"></div>
+  </aside>
+  <main>
+    <div class="bar">
+      <span class="name" id="name">未选择</span>
+      <button id="btnFit">适配</button>
+      <button id="btnIn">放大</button>
+      <button id="btnOut">缩小</button>
+      <button id="btnRaw">原文/脑图</button>
+      <button id="btnExp">导出 .md</button>
+    </div>
+    <div class="stage">
+      <svg id="map"></svg>
+      <pre id="raw"></pre>
+      <div class="empty" id="empty">从左侧选择一本书，开始查看它的思维脑图。</div>
+      <div class="legend">
+        证据链：<span class="tag-o">【原文】</span> 真实元数据 ·
+        <span class="tag-t">【推导】</span> 基于简介的推演 ·
+        <span class="tag-w">【外援】</span> 跨学科启发提示
+      </div>
+    </div>
+  </main>
+</div>
+<div class="note">
+  说明：本脑图按《深度阅读工程流 Rev3.0》的骨架（①元评估 ②学科定调 ③五维拆解 ④概念树 ⑤结构化 ⑥落地验证）生成；
+  内容细节取自书籍公开元数据（简介 / 分类 / 作者 / 出版 / 评分），未做全书精读。需要对某本书做 L3 研究级深挖时，请提供正文。
+</div>
+
+<!-- 可视化库：d3 + markmap（同源上传到 ./assets/） -->
+<script src="./assets/d3.min.js"></script>
+<script src="./assets/markmap-lib.js"></script>
+<script src="./assets/markmap-view.js"></script>
+<!-- 书单来自仓库根目录已上传的 books.js（window.__books），避免依赖 7.7MB 的 books_data.js -->
+<script src="../books.js"></script>
+<script>
+(function(){
+  // 复用根目录 books.js 的书单（id/title/author/cover/category），md 按需 fetch
+  const books = (window.__books || []).map(function(b){
+    return { id: b.id, t: b.title, a: b.author, cover: b.cover, c: b.category, md: '' };
+  });
+  const listEl = document.getElementById('list');
+  const qEl = document.getElementById('q');
+  const catEl = document.getElementById('cat');
+  const cntEl = document.getElementById('cnt');
+  const nameEl = document.getElementById('name');
+  const emptyEl = document.getElementById('empty');
+  const svg = document.getElementById('map');
+  const rawEl = document.getElementById('raw');
+  const totalEl = document.getElementById('total');
+
+  if(!window.markmap || !window.markmap.Transformer || !window.markmap.Markmap){
+    emptyEl.textContent = '可视化库加载失败：请确认 ./assets/ 下的 d3 / markmap-lib / markmap-view 三个文件存在。';
+    emptyEl.style.color = '#c05621';
+  }
+
+  totalEl.textContent = books.length + ' 本';
+
+  // 分类下拉
+  const cats = Array.from(new Set(books.map(b=>b.c).filter(Boolean))).sort();
+  cats.forEach(c=>{ const o=document.createElement('option'); o.value=c; o.textContent=c; catEl.appendChild(o); });
+
+  let mm = null, current = null, rawMode = false;
+  const transformer = (window.markmap && window.markmap.Transformer) ? new window.markmap.Transformer() : null;
+
+  function esc(s){ return (s||'').replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
+
+  function renderList(){
+    const q = qEl.value.trim().toLowerCase();
+    const c = catEl.value;
+    const filtered = books.filter(b=>{
+      if(c && b.c !== c) return false;
+      if(q && !(b.t.toLowerCase().includes(q) || (b.a||'').toLowerCase().includes(q))) return false;
+      return true;
+    });
+    cntEl.textContent = '匹配 ' + filtered.length + ' / ' + books.length + ' 本';
+    listEl.innerHTML = '';
+    filtered.forEach(b=>{
+      const d = document.createElement('div');
+      d.className = 'item' + (current && current.id===b.id ? ' active':'');
+      const img = b.cover ? '<img loading="lazy" src="'+esc(b.cover)+'" onerror="this.style.visibility=\'hidden\'">' : '<img>';
+      d.innerHTML = img + '<div class="meta"><div class="tt">'+esc(b.t)+'</div><div class="au">'+(b.a||'')+'</div></div>';
+      d.onclick = ()=> select(b);
+      listEl.appendChild(d);
+    });
+  }
+
+  function renderMindmap(b){
+    if(!transformer){ rawEl.textContent = b.md; rawEl.style.display='block'; svg.style.display='none'; return; }
+    try{
+      const { root } = transformer.transform(b.md);
+      if(mm && mm.destroy) mm.destroy();
+      mm = window.markmap.Markmap.create(svg, {
+        duration: 300, maxWidth: 280, paddingX: 14, paddingY: 12,
+        lineWidth: 2.2, fitRatio: 0.92, pan: true, zoom: true,
+        color: (d)=> {
+          const palette = ['#2b6cb0','#2c7a7b','#c05621','#6b46c1','#b7791f','#2f855a','#3182ce','#dd6b20'];
+          const seg = (d.state.path || '1').split('.');
+          const idx = seg.length > 1 ? parseInt(seg[1], 10) : 0;
+          return palette[(idx - 1) % palette.length] || '#2b6cb0';
+        }
+      }, root);
+      setTimeout(()=>{ try{ mm && mm.fit && mm.fit(); }catch(e){} }, 60);
+    }catch(e){
+      rawEl.textContent = b.md; rawEl.style.display='block'; svg.style.display='none';
+    }
+  }
+
+  function select(b){
+    current = b;
+    nameEl.textContent = b.t;
+    emptyEl.style.display = 'none';
+    rawEl.style.display = 'none';
+    svg.style.display = 'block';
+    rawMode = false;
+    document.getElementById('btnRaw').textContent = '原文/脑图';
+    renderList();
+    // 按需加载本书 md
+    emptyEl.textContent = '加载思维导图中…';
+    emptyEl.style.display = 'flex';
+    svg.style.display = 'none';
+    fetch('./md/' + b.id + '.md')
+      .then(r=>{ if(!r.ok) throw new Error('missing'); return r.text(); })
+      .then(txt=>{
+        b.md = txt;
+        emptyEl.style.display = 'none';
+        svg.style.display = 'block';
+        renderMindmap(b);
+      })
+      .catch(()=>{
+        emptyEl.textContent = '本书暂无思维导图（可能尚未生成或已跳过）';
+        emptyEl.style.display = 'flex';
+        svg.style.display = 'none';
+      });
+  }
+
+  document.getElementById('btnFit').onclick = ()=>{ try{ mm && mm.fit && mm.fit(); }catch(e){} };
+  document.getElementById('btnIn').onclick = ()=>{ try{ mm && mm.rescale && mm.rescale(1.25); }catch(e){} };
+  document.getElementById('btnOut').onclick = ()=>{ try{ mm && mm.rescale && mm.rescale(0.8); }catch(e){} };
+  document.getElementById('btnRaw').onclick = ()=>{
+    if(!current) return;
+    rawMode = !rawMode;
+    if(rawMode){ rawEl.textContent = current.md; rawEl.style.display='block'; svg.style.display='none'; document.getElementById('btnRaw').textContent='回到脑图'; }
+    else { rawEl.style.display='none'; svg.style.display='block'; document.getElementById('btnRaw').textContent='原文/脑图'; try{ mm && mm.fit && mm.fit(); }catch(e){} }
+  };
+  document.getElementById('btnExp').onclick = ()=>{
+    if(!current) return;
+    const blob = new Blob([current.md], {type:'text/markdown;charset=utf-8'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = current.t.replace(/[\\/:*?"<>|]/g,'_') + '.md';
+    a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+  };
+
+  qEl.addEventListener('input', renderList);
+  catEl.addEventListener('change', renderList);
+
+  renderList();
+  if(books[0]) select(books[0]);
+})();
+</script>
+</body>
+</html>
