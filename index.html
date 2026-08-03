@@ -517,6 +517,22 @@ body{
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
 }
+
+/* ═══════════ 页脚（低调入口） ═══════════ */
+.site-footer{
+  margin-top:10px;padding:24px 24px 30px;text-align:center;
+  color:var(--ink-3);font-size:.72rem;letter-spacing:.03em
+}
+.site-footer .footer-inner{
+  max-width:1440px;margin:0 auto;display:flex;flex-direction:column;gap:9px;align-items:center
+}
+.site-footer .footer-line{border:0;border-top:1px solid rgba(200,169,90,.16);width:min(320px,60%);margin:0 auto 14px}
+.site-footer a{
+  color:var(--gold-deep);text-decoration:none;opacity:.78;
+  transition:opacity .2s,transform .2s;display:inline-flex;align-items:center;gap:4px
+}
+.site-footer a:hover{opacity:1;text-decoration:underline}
+.site-footer .tip{font-size:.64rem;color:var(--ink-3);opacity:.7}
 </style>
 </head>
 <body>
@@ -563,12 +579,21 @@ body{
   <div class="loading" id="loading"><div class="spinner"></div><p>正在搬书上架…</p></div>
   <div class="grid" id="grid" role="list" style="display:none"></div>
   <div class="load-more" id="loadMore" role="button" tabindex="0">加载更多…</div>
-  <div class="empty-state" id="empty" style="display:none">
+    <div class="empty-state" id="empty" style="display:none">
     <div class="icon">📚</div>
     <p id="emptyMsg">没有找到匹配的书籍</p>
     <button id="emptyReset">清除筛选条件</button>
   </div>
 </main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-line"></div>
+    <span>📚 我的书房 · <span id="footerCount"></span> 册藏书 · 阅读即生活</span>
+    <a href="mindmaps/index.html" target="_blank" rel="noopener noreferrer">🧠 书库思维脑图 · 总览</a>
+    <span class="tip">每本书的思维导图按需加载，亦可单本在详情弹窗中打开</span>
+  </div>
+</footer>
 
 <div class="modal-overlay" id="modal" aria-hidden="true">
   <div class="modal" role="dialog" aria-modal="true" aria-label="书籍详情"><div id="modalContent"></div></div>
@@ -1673,6 +1698,8 @@ function hideMindmapErr(){ const e = $('mmErr'); e.style.display = 'none'; }
 (function init(){
   $('loading').style.display = 'none';
   $('grid').style.display = 'grid';
+  const fc = $('footerCount');
+  if (fc) fc.textContent = String(books.length);
   initFilters();
   filterBooks();
 })();
