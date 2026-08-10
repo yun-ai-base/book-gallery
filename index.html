@@ -192,8 +192,15 @@ html[data-theme="dark"] *::-webkit-scrollbar-thumb{background:rgba(200,169,90,.2
 .hdr-ico{width:15px;height:15px;flex-shrink:0;display:inline-block;vertical-align:-2px}
 .btn-filter.active{background:rgba(200,169,90,.18)!important;border-color:rgba(200,169,90,.5)!important;color:#f0e2c0!important;font-weight:600}
 .stats{font-size:.78rem;color:rgba(220,208,186,.9);white-space:nowrap;letter-spacing:.02em}
-.stats-panel-btn{font-size:.78rem;cursor:pointer;opacity:.85;transition:opacity .2s;color:rgba(220,208,186,.9);padding:6px 2px;border-radius:8px}
-.stats-panel-btn:hover{opacity:1;color:#f0e4d0}
+/* 头部右侧工具图标（统计/孪生/主题） */
+.header-icons{display:flex;align-items:center;gap:6px;margin-left:auto;flex-shrink:0}
+.header-icon-btn{
+  display:inline-flex;align-items:center;gap:4px;font-size:.76rem;cursor:pointer;
+  opacity:.85;transition:opacity .2s;color:rgba(220,208,186,.92);
+  padding:6px 8px;border-radius:8px;white-space:nowrap;user-select:none
+}
+.header-icon-btn:hover{opacity:1;color:#f0e4d0;background:rgba(255,255,255,.08)}
+.header-icon-btn:active{transform:scale(.95)}
 
 /* ═══════════ 今日推荐条 ═══════════ */
 .recommend-bar{
@@ -557,10 +564,17 @@ html[data-theme="dark"] .mindmap-close:hover{color:#e8ddc6}
 
 /* ═══════════ 响应式 ═══════════ */
 @media(max-width:1000px){
+  /* 头部三行布局：标题+图标 / 搜索全宽 / 筛选横滑 */
   .header-inner{height:auto;padding:12px 0;flex-wrap:wrap;gap:10px}
-  .header-controls{flex-wrap:wrap;gap:8px}.search-wrap{max-width:100%}
+  .header h1{order:1;margin:0}
+  .header-icons{order:2;margin-left:auto;gap:2px}
+  .header-icon-btn{padding:6px}
+  .header-controls{order:3;flex:1 1 100%;flex-wrap:wrap;gap:8px}
+  .search-wrap{order:1;width:100%;max-width:100%}
+  .filter-group{order:2;width:100%;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+  .filter-group::-webkit-scrollbar{display:none}
+  .filter-group select,.filter-group button{flex:0 0 auto}
   .stats{display:none}
-  .stats-panel-btn{display:inline-block}
   .grid{gap:14px;grid-template-columns:repeat(auto-fill,minmax(136px,1fr))}
   .modal-top{flex-direction:column;align-items:center;text-align:center;padding:24px 22px 16px}
   .modal-top .cover-area{width:132px}
@@ -723,6 +737,11 @@ html[data-theme="dark"] .quote-close:hover{color:#e8ddc6}
 <header class="header">
   <div class="header-inner">
     <h1 id="logoBtn" title="回到顶部">我的书房<span class="en">MY LIBRARY</span></h1>
+    <div class="header-icons">
+      <span class="header-icon-btn" id="statsBtn" title="阅读统计与榜单"><svg class="hdr-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 20V11M12 20V4M19 20v-6"/></svg>统计</span>
+      <span class="header-icon-btn" id="twinBtn" title="我的其他项目"><svg class="hdr-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/></svg>孪生宇宙</span>
+      <span class="header-icon-btn" id="themeBtn" title="切换明暗主题" role="button" tabindex="0" aria-label="切换明暗主题"></span>
+    </div>
     <div class="header-controls">
       <div class="search-wrap">
         <span class="icon"><svg class="hdr-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></span>
@@ -750,9 +769,6 @@ html[data-theme="dark"] .quote-close:hover{color:#e8ddc6}
       </div>
       <span class="stats" id="stats"></span>
       <span class="stats" id="statsSummary"></span>
-      <span class="stats stats-panel-btn" id="statsBtn" title="阅读统计与榜单"><svg class="hdr-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 20V11M12 20V4M19 20v-6"/></svg>统计</span>
-      <span class="stats stats-panel-btn" id="twinBtn" title="我的其他项目"><svg class="hdr-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/></svg>孪生宇宙</span>
-      <span class="stats stats-panel-btn" id="themeBtn" title="切换明暗主题" role="button" tabindex="0" aria-label="切换明暗主题"></span>
     </div>
   </div>
 </header>
