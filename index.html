@@ -575,7 +575,7 @@ html[data-theme="dark"] .mindmap-close:hover{color:#e8ddc6}
 /* ═══════════ 响应式 ═══════════ */
 @media(max-width:1000px){
   /* 头部三行布局：标题+图标 / 搜索全宽 / 筛选横滑 */
-  .header-inner{height:auto;padding:12px 0;flex-wrap:wrap;gap:10px}
+  .header-inner{height:auto;padding:12px 14px;flex-wrap:wrap;gap:10px}
   .header h1{order:1;margin:0}
   .header-icons{order:2;margin-left:auto;gap:2px}
   .header-icon-btn{padding:6px}
@@ -596,6 +596,8 @@ html[data-theme="dark"] .mindmap-close:hover{color:#e8ddc6}
 @media(max-width:640px){
   .cs-trigger{height:34px;padding:0 10px;font-size:.75rem}
   .cs-trigger .cs-value{min-width:3.2em}
+  .cs-menu{max-height:52vh;padding:5px;-webkit-overflow-scrolling:touch}
+  .cs-option{padding:11px 14px;font-size:.82rem}
   .btn-filter{height:34px;padding:0 10px;font-size:.75rem}
   .search-wrap input{height:34px;font-size:.8rem}
   .recommend-bar{padding:0 14px;margin-top:14px}
@@ -1009,10 +1011,42 @@ function initFilters(){
     sortMenu.appendChild(o);
   });
 }
+// 下拉菜单浮层定位：用 position:fixed 计算视口坐标，避免被 .filter-group 的
+// overflow-x 滚动容器整块剪裁（移动端「点了没反应」的根因）
+function positionDropdown(wrap){
+  const menu = wrap.querySelector('.cs-menu'), trigger = wrap.querySelector('.cs-trigger');
+  if (!menu.classList.contains('open')) return;
+  const tr = trigger.getBoundingClientRect();
+  const vw = window.innerWidth, vh = window.innerHeight, pad = 8, gap = 6;
+  menu.style.position = 'fixed';
+  menu.style.left = '0px'; menu.style.top = '0px'; menu.style.width = 'auto';
+  menu.style.minWidth = '0px'; // fixed 下 min-width:100% 会按视口宽解析，先归零再做探针
+  const probe = menu.getBoundingClientRect(); // 探针：读出真实包含块原点（兼容 backdrop-filter 产生的新包含块）
+  const originX = probe.left, originY = probe.top;
+  const mw = Math.min(Math.max(tr.width, probe.width), vw - pad * 2);
+  const mh = probe.height;
+  const left = Math.min(Math.max(tr.left, pad), Math.max(pad, vw - pad - mw));
+  let top = tr.bottom + gap;
+  if (top + mh > vh - pad && tr.top - gap - mh >= pad) top = tr.top - gap - mh; // 下方不够则翻到上方
+  top = Math.max(pad, Math.min(top, Math.max(pad, vh - pad - mh)));
+  menu.style.left = (left - originX) + 'px';
+  menu.style.top = (top - originY) + 'px';
+  menu.style.width = mw + 'px';
+  menu.style.minWidth = '0px';
+}
+function resetDropdown(menu){
+  if (!menu) return;
+  menu.style.position = ''; menu.style.left = ''; menu.style.top = '';
+  menu.style.width = ''; menu.style.minWidth = '';
+}
 function csToggle(wrap){
   const menu = wrap.querySelector('.cs-menu'), trigger = wrap.querySelector('.cs-trigger');
+  const willOpen = !menu.classList.contains('open');
   closeAllDropdowns();
-  trigger.classList.toggle('open'); menu.classList.toggle('open');
+  if (!willOpen) return;
+  trigger.classList.add('open');
+  menu.classList.add('open');
+  positionDropdown(wrap);
 }
 function csSelect(option, wrapId){
   const wrap = $(wrapId), trigger = wrap.querySelector('.cs-trigger');
@@ -1028,7 +1062,9 @@ function csSelect(option, wrapId){
   }
 }
 function closeAllDropdowns(){
-  document.querySelectorAll('.cs-menu.open').forEach(m => m.classList.remove('open'));
+  const openMenus = document.querySelectorAll('.cs-menu.open');
+  if (!openMenus.length) return; // 无展开时零成本：scroll 事件里不会被反复遍历
+  openMenus.forEach(m => { m.classList.remove('open'); resetDropdown(m); });
   document.querySelectorAll('.cs-trigger.open').forEach(t => t.classList.remove('open'));
 }
 function csGetValue(wrapId){
@@ -1048,6 +1084,13 @@ document.querySelectorAll('[data-dropdown]').forEach(wrap => {
   });
 });
 document.addEventListener('click', e => { if (!e.target.closest('.cs-wrap')) closeAllDropdowns(); });
+// 浮层菜单与触发器脱锚保护：页面滚动 / 筛选行横滑 / 窗口缩放时收起
+document.addEventListener('scroll', e => {
+  const t = e.target;
+  if (t && t.nodeType === 1 && t.closest('.cs-menu')) return; // 菜单自身滚动不算
+  closeAllDropdowns();
+}, true);
+window.addEventListener('resize', () => closeAllDropdowns(), { passive: true });
 
 /* ═══════════ 搜索（防抖 + 高亮） ═══════════ */
 let searchTimer = null;
